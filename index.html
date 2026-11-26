@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Exit Ticket: Procedures</title>
+<style>
+  :root { --navy:#1B2B5E; --teal:#0D9488; --bg:#F6F7F4; --card:#FFFFFF; --muted:#4A5568; --line:#D9DEE8; --good:#0B7A70; --bad:#B4542F; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--navy); font:17px/1.5 Calibri, "Segoe UI", Arial, sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:24px 16px 48px; }
+  .kicker { color:var(--teal); font-weight:700; letter-spacing:.12em; text-transform:uppercase; font-size:13px; }
+  h1 { font-family:Cambria, Georgia, serif; margin:4px 0 4px; font-size:30px; }
+  .lead { color:var(--muted); margin:0 0 20px; }
+  .q { background:var(--card); border:1px solid var(--line); border-left:6px solid var(--teal); border-radius:10px; padding:18px 20px; margin:0 0 16px; }
+  .q h2 { font-size:18px; margin:0 0 10px; }
+  pre { background:#0F1B3D; color:#E8EEF9; padding:14px 16px; border-radius:8px; overflow-x:auto; font:15px/1.5 Consolas, "Courier New", monospace; margin:0 0 12px; }
+  label.opt { display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid var(--line); border-radius:8px; margin:0 0 8px; cursor:pointer; }
+  label.opt:hover { border-color:var(--teal); }
+  label.opt input { margin-top:4px; }
+  .mono { font-family:Consolas, "Courier New", monospace; }
+  input[type=text], textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:8px; font:inherit; color:inherit; }
+  textarea { min-height:80px; resize:vertical; }
+  button { background:var(--navy); color:#fff; border:0; border-radius:8px; padding:12px 22px; font:inherit; font-weight:700; cursor:pointer; }
+  button:disabled { opacity:.5; cursor:default; }
+  .msg { margin-top:12px; color:var(--bad); }
+  .fb { margin-top:10px; padding:10px 12px; border-radius:8px; font-weight:600; }
+  .fb.good { background:#E6F4F2; color:var(--good); }
+  .fb.bad { background:#FBEDE7; color:var(--bad); }
+  .score { font-size:22px; font-weight:700; margin:8px 0 16px; }
+  .chosen { border-color:var(--navy); background:#EEF1F8; }
+</style>
+</head>
+<body>
+<main>
+  <div class="kicker">Year 9 · Exit ticket</div>
+  <h1>Procedures</h1>
+  <p class="lead">Answer on your own, in silence. You will see the answers after you submit.</p>
+
+  <form id="ticket" novalidate>
+    <div class="q">
+      <h2>Your name</h2>
+      <input type="text" id="name" autocomplete="off" required>
+    </div>
+
+    <div class="q" data-q="q1">
+      <h2>1. What is the exact output of this program, line by line?</h2>
+<pre>PROCEDURE Cheer
+    OUTPUT "Go team!"
+ENDPROCEDURE
+
+OUTPUT "Ready"
+CALL Cheer
+CALL Cheer
+OUTPUT "Finished"</pre>
+      <label class="opt"><input type="radio" name="q1" value="A"> <span>Go team! → Ready → Go team! → Finished</span></label>
+      <label class="opt"><input type="radio" name="q1" value="B"> <span>Ready → Go team! → Finished</span></label>
+      <label class="opt"><input type="radio" name="q1" value="C"> <span>Ready → Go team! → Go team! → Finished</span></label>
+      <label class="opt"><input type="radio" name="q1" value="D"> <span>Ready → Finished</span></label>
+    </div>
+
+    <div class="q" data-q="q2">
+      <h2>2. Which line of code runs a procedure called ShowRules?</h2>
+      <label class="opt"><input type="radio" name="q2" value="A"> <span class="mono">PROCEDURE ShowRules</span></label>
+      <label class="opt"><input type="radio" name="q2" value="B"> <span class="mono">CALL ShowRules</span></label>
+      <label class="opt"><input type="radio" name="q2" value="C"> <span class="mono">ShowRules</span></label>
+      <label class="opt"><input type="radio" name="q2" value="D"> <span class="mono">ENDPROCEDURE ShowRules</span></label>
+    </div>
+
+    <div class="q" data-q="q3">
+      <h2>3. Give one reason why programmers use procedures.</h2>
+      <textarea id="q3"></textarea>
+    </div>
+
+    <button type="submit" id="submit">Submit</button>
+    <div class="msg" id="msg" hidden></div>
+  </form>
+
+  <section id="result" hidden>
+    <div class="score" id="score"></div>
+    <div id="feedback"></div>
+    <p class="lead">Your answers have been sent. You can close this page.</p>
+  </section>
+</main>
+
+<script>
+// Paste your Apps Script web app URL here (ends in /exec)
+const SCRIPT_URL = "PASTE_YOUR_WEB_APP_URL_HERE";
+const TICKET_ID = "Y9-L2-procedures";
+
+const KEY = {
+  q1: { correct: "C", right: "Correct. The procedure only runs when it is called, and it runs each time it is called.",
+        wrong: "Not quite. The procedure does nothing until it is called. It is called twice, after \"Ready\" and before \"Finished\"." },
+  q2: { correct: "B", right: "Correct. CALL runs the procedure.",
+        wrong: "Not quite. PROCEDURE … ENDPROCEDURE defines it; CALL ShowRules runs it." }
+};
+
+const form = document.getElementById("ticket");
+const msg = document.getElementById("msg");
+const btn = document.getElementById("submit");
+
+function picked(name) {
+  const el = form.querySelector('input[name="' + name + '"]:checked');
+  return el ? el.value : "";
+}
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = document.getElementById("name").value.trim();
+  const q1 = picked("q1"), q2 = picked("q2");
+  const q3 = document.getElementById("q3").value.trim();
+  if (!name || !q1 || !q2 || !q3) {
+    msg.textContent = "Please answer every question, including your name.";
+    msg.hidden = false; return;
+  }
+  msg.hidden = true; btn.disabled = true; btn.textContent = "Sending…";
+  const payload = { ticket: TICKET_ID, name, q1, q2, q3 };
+  let sent = true;
+  try {
+    // text/plain avoids a CORS preflight; the reply cannot be read in no-cors mode
+    await fetch(SCRIPT_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(payload) });
+  } catch (err) { sent = false; }
+  showResult({ q1, q2 }, sent);
+});
+
+function showResult(ans, sent) {
+  let score = 0; const fb = document.getElementById("feedback"); fb.innerHTML = "";
+  for (const q of ["q1", "q2"]) {
+    const ok = ans[q] === KEY[q].correct; if (ok) score++;
+    const box = form.querySelector('[data-q="' + q + '"]');
+    box.querySelectorAll("input").forEach(i => { i.disabled = true; if (i.checked) i.closest("label").classList.add("chosen"); });
+    const d = document.createElement("div"); d.className = "fb " + (ok ? "good" : "bad"); d.textContent = KEY[q].right && ok ? KEY[q].right : KEY[q].wrong;
+    box.appendChild(d);
+  }
+  document.getElementById("q3").disabled = true;
+  document.getElementById("name").disabled = true;
+  btn.hidden = true;
+  document.getElementById("score").textContent = "Score: " + score + " / 2 (question 3 is read by your teacher)";
+  const res = document.getElementById("result"); res.hidden = false;
+  if (!sent) res.querySelector(".lead").textContent = "Your answers could not be sent. Please show this screen to your teacher.";
+}
+</script>
+</body>
+</html>
